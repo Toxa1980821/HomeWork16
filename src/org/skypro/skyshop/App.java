@@ -8,10 +8,11 @@ import org.skypro.skyshop.product.SimpleProduct;
 import org.skypro.skyshop.product.Article;
 import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
-import java.util.Arrays;
+import org.skypro.skyshop.search.BestResultNotFound;
 
 public class App {
     public static void main(String[] args) {
+        // --- Корзина ---
         ProductBasket basket = new ProductBasket();
 
         Product p1 = new SimpleProduct("Ноутбук", 50000);
@@ -38,6 +39,45 @@ public class App {
         System.out.println("Стоимость пустой корзины: " + basket.getTotalPrice());
         System.out.println("Есть ли 'Ноутбук' в пустой корзине? " + basket.containsProductByName("Ноутбук"));
 
+        // --- Демонстрация проверок данных ---
+        System.out.println("\n=== ТЕСТИРОВАНИЕ ПРОВЕРОК ===");
+
+        // Product: пустое название
+        try {
+            new SimpleProduct("   ", 1000);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        // Product: null название
+        try {
+            new DiscountedProduct(null, 1000, 10);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        // SimpleProduct: цена <= 0
+        try {
+            new SimpleProduct("Монитор", 0);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        // DiscountedProduct: basePrice <= 0
+        try {
+            new DiscountedProduct("Планшет", -500, 15);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        // DiscountedProduct: скидка вне диапазона
+        try {
+            new DiscountedProduct("Планшет", 5000, 150);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        // --- Поиск ---
         System.out.println("\n=== ТЕСТИРОВАНИЕ ПОИСКА ===");
 
         SearchEngine engine = new SearchEngine(20);
@@ -48,9 +88,10 @@ public class App {
         engine.add(p4);
         engine.add(p5);
         engine.add(p6);
+
         Article a1 = new Article(
                 "Как выбрать ноутбук",
-                "При выборе ноутбука важно смотреть на процессор и видеокарту."
+                "Ноутбук ноутбук ноутбук — выбирай с умом. Ноутбук должен подходить вам."
         );
         Article a2 = new Article(
                 "Лучшие мыши для работы",
@@ -65,11 +106,28 @@ public class App {
         engine.add(a2);
         engine.add(a3);
 
+        // Обычный поиск (как в прошлой домашке)
         testSearch(engine, "ноутбук");
         testSearch(engine, "мышь");
-        testSearch(engine, "фикс");
-        testSearch(engine, "видеокарта");
-        testSearch(engine, "ничего");
+
+        // --- Демонстрация searchBest ---
+        System.out.println("\n=== ТЕСТИРОВАНИЕ searchBest ===");
+
+        // Сценарий 1: объект существует
+        try {
+            Searchable best = engine.searchBest("ноутбук");
+            System.out.println("Лучший результат: " + best.getStringRepresentation());
+        } catch (BestResultNotFound e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+
+        // Сценарий 2: объект не найден — выбрасывается исключение
+        try {
+            Searchable best = engine.searchBest(" несуществующий_запрос ");
+            System.out.println("Лучший результат: " + best.getStringRepresentation());
+        } catch (BestResultNotFound e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
     }
 
     private static void testSearch(SearchEngine engine, String query) {
