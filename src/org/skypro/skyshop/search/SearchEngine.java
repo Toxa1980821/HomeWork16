@@ -1,21 +1,22 @@
 package org.skypro.skyshop.search;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 public class SearchEngine {
     private final List<Searchable> items;
 
     public SearchEngine(int capacity) {
-        this.items = new LinkedList<>();
+        this.items = new ArrayList<>();
     }
 
     public void add(Searchable item) {
         items.add(item);
     }
 
-    public List<Searchable> search(String query) {
-        List<Searchable> results = new LinkedList<>();
+    public TreeMap<String, Searchable> search(String query) {
+        TreeMap<String, Searchable> results = new TreeMap<>();
 
         for (Searchable item : items) {
             if (item == null) {
@@ -23,7 +24,7 @@ public class SearchEngine {
             }
             String term = item.getSearchTerm();
             if (term != null && term.contains(query)) {
-                results.add(item);
+                results.put(item.getName(), item);   // ключ — имя → дубликаты схлопнутся
             }
         }
         return results;
@@ -68,3 +69,5 @@ public class SearchEngine {
         return count;
     }
 }
+
+
