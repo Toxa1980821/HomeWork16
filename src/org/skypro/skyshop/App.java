@@ -10,6 +10,8 @@ import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
 import org.skypro.skyshop.search.BestResultNotFound;
 
+import java.util.List;
+
 public class App {
     public static void main(String[] args) {
         // --- Корзина ---
@@ -29,10 +31,31 @@ public class App {
         basket.addProduct(p5);
         basket.addProduct(p6);
 
+        // Демонстрация: добавили 6 продуктов — без ошибки, список не ограничен
         basket.printBasket();
         System.out.println("Общая стоимость: " + basket.getTotalPrice());
         System.out.println("Есть ли 'Ноутбук' в корзине? " + basket.containsProductByName("Ноутбук"));
         System.out.println("Есть ли 'Принтер' в корзине? " + basket.containsProductByName("Принтер"));
+
+        // --- Демонстрация removeProductsByName ---
+        System.out.println("\n=== УДАЛЕНИЕ ПРОДУКТОВ ===");
+
+        // Сценарий 1: удаляем существующий продукт
+        List<Product> removed = basket.removeProductsByName("Мышь");
+        System.out.println("Удалённые продукты:");
+        for (Product p : removed) {
+            System.out.println(p);
+        }
+        System.out.println("Содержимое корзины после удаления:");
+        basket.printBasket();
+
+        // Сценарий 2: удаляем несуществующий продукт
+        List<Product> removedEmpty = basket.removeProductsByName("Принтер");
+        if (removedEmpty.isEmpty()) {
+            System.out.println("\nСписок пуст");
+        }
+        System.out.println("Содержимое корзины:");
+        basket.printBasket();
 
         basket.clear();
         basket.printBasket();
@@ -42,35 +65,30 @@ public class App {
         // --- Демонстрация проверок данных ---
         System.out.println("\n=== ТЕСТИРОВАНИЕ ПРОВЕРОК ===");
 
-        // Product: пустое название
         try {
             new SimpleProduct("   ", 1000);
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
         }
 
-        // Product: null название
         try {
             new DiscountedProduct(null, 1000, 10);
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
         }
 
-        // SimpleProduct: цена <= 0
         try {
             new SimpleProduct("Монитор", 0);
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
         }
 
-        // DiscountedProduct: basePrice <= 0
         try {
             new DiscountedProduct("Планшет", -500, 15);
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
         }
 
-        // DiscountedProduct: скидка вне диапазона
         try {
             new DiscountedProduct("Планшет", 5000, 150);
         } catch (IllegalArgumentException e) {
@@ -106,14 +124,12 @@ public class App {
         engine.add(a2);
         engine.add(a3);
 
-        // Обычный поиск (как в прошлой домашке)
         testSearch(engine, "ноутбук");
         testSearch(engine, "мышь");
 
-        // --- Демонстрация searchBest ---
+        // --- searchBest ---
         System.out.println("\n=== ТЕСТИРОВАНИЕ searchBest ===");
 
-        // Сценарий 1: объект существует
         try {
             Searchable best = engine.searchBest("ноутбук");
             System.out.println("Лучший результат: " + best.getStringRepresentation());
@@ -121,9 +137,8 @@ public class App {
             System.out.println("Ошибка: " + e.getMessage());
         }
 
-        // Сценарий 2: объект не найден — выбрасывается исключение
         try {
-            Searchable best = engine.searchBest(" несуществующий_запрос ");
+            Searchable best = engine.searchBest("несуществующий_запрос");
             System.out.println("Лучший результат: " + best.getStringRepresentation());
         } catch (BestResultNotFound e) {
             System.out.println("Ошибка: " + e.getMessage());
@@ -132,19 +147,13 @@ public class App {
 
     private static void testSearch(SearchEngine engine, String query) {
         System.out.println("\nПоиск по запросу: \"" + query + "\"");
-        Searchable[] results = engine.search(query);
-        boolean foundAny = false;
-        for (Searchable s : results) {
-            if (s != null) {
-                System.out.println(s.getStringRepresentation());
-                foundAny = true;
-            }
-        }
-        if (!foundAny) {
+        List<Searchable> results = engine.search(query);
+        if (results.isEmpty()) {
             System.out.println("Ничего не найдено");
+        } else {
+            for (Searchable s : results) {
+                System.out.println(s.getStringRepresentation());
+            }
         }
     }
 }
-
-
-
