@@ -15,31 +15,22 @@ public class ProductBasket {
     }
 
     public void addProduct(Product product) {
-
         items.computeIfAbsent(product.getName(), k -> new ArrayList<>())
                 .add(product);
     }
 
     public int getTotalPrice() {
-        int total = 0;
-        for (List<Product> group : items.values()) {
-            for (Product p : group) {
-                total += p.getPrice();
-            }
-        }
-        return total;
+        return items.values().stream()
+                .flatMap(List::stream)
+                .mapToInt(Product::getPrice)
+                .sum();
     }
 
-    public int getSpecialCount() {
-        int count = 0;
-        for (List<Product> group : items.values()) {
-            for (Product p : group) {
-                if (p.isSpecial()) {
-                    count++;
-                }
-            }
-        }
-        return count;
+    private long getSpecialCount() {
+        return items.values().stream()
+                .flatMap(List::stream)
+                .filter(Product::isSpecial)
+                .count();
     }
 
     public void printBasket() {
@@ -48,11 +39,9 @@ public class ProductBasket {
             return;
         }
 
-        for (List<Product> group : items.values()) {
-            for (Product p : group) {
-                System.out.println(p);
-            }
-        }
+        items.values().stream()
+                .flatMap(List::stream)
+                .forEach(System.out::println);
 
         System.out.println("Итого: " + getTotalPrice());
         System.out.println("Специальных товаров: " + getSpecialCount());
