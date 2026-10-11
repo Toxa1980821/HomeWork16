@@ -1,22 +1,25 @@
 package org.skypro.skyshop.search;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class SearchEngine {
-    private final List<Searchable> items;
+    private final Set<Searchable> items;
+    private final Comparator<Searchable> resultComparator;
 
     public SearchEngine(int capacity) {
-        this.items = new ArrayList<>();
+        this.items = new HashSet<>();
+        this.resultComparator = new SearchResultComparator();
     }
 
     public void add(Searchable item) {
         items.add(item);
     }
 
-    public TreeMap<String, Searchable> search(String query) {
-        TreeMap<String, Searchable> results = new TreeMap<>();
+    public Set<Searchable> search(String query) {
+        Set<Searchable> results = new TreeSet<>(resultComparator);
 
         for (Searchable item : items) {
             if (item == null) {
@@ -24,7 +27,7 @@ public class SearchEngine {
             }
             String term = item.getSearchTerm();
             if (term != null && term.contains(query)) {
-                results.put(item.getName(), item);   // ключ — имя → дубликаты схлопнутся
+                results.add(item);
             }
         }
         return results;
@@ -69,5 +72,3 @@ public class SearchEngine {
         return count;
     }
 }
-
-

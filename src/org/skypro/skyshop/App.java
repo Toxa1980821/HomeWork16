@@ -9,9 +9,7 @@ import org.skypro.skyshop.product.Article;
 import org.skypro.skyshop.search.SearchEngine;
 import org.skypro.skyshop.search.Searchable;
 import org.skypro.skyshop.search.BestResultNotFound;
-
-import java.util.TreeMap;
-
+import java.util.Set;
 import java.util.List;
 
 public class App {
@@ -149,12 +147,12 @@ public class App {
 
     private static void testSearch(SearchEngine engine, String query) {
         System.out.println("\nПоиск по запросу: \"" + query + "\"");
-        TreeMap<String, Searchable> results = engine.search(query);
+        Set<Searchable> results = engine.search(query);
 
         if (results.isEmpty()) {
             System.out.println("Ничего не найдено");
         } else {
-            for (Searchable s : results.values()) {
+            for (Searchable s : results) {
                 System.out.println(s.getStringRepresentation());
             }
         }

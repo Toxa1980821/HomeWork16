@@ -15,7 +15,7 @@ public class ProductBasket {
     }
 
     public void addProduct(Product product) {
-        // Если списка по такому имени ещё нет — создаём его
+
         items.computeIfAbsent(product.getName(), k -> new ArrayList<>())
                 .add(product);
     }
@@ -63,9 +63,9 @@ public class ProductBasket {
     }
 
     public List<Product> removeProductsByName(String name) {
-        List<Product> removed = items.remove(name);   // удаляем по ключу
+        List<Product> removed = items.remove(name);
         if (removed == null) {
-            return new ArrayList<>();                  // таковых не было → пустой список
+            return new ArrayList<>();
         }
         return removed;
     }
