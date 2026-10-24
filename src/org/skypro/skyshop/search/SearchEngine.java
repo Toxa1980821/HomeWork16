@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class SearchEngine {
     private final Set<Searchable> items;
@@ -19,19 +20,15 @@ public class SearchEngine {
     }
 
     public Set<Searchable> search(String query) {
-        Set<Searchable> results = new TreeSet<>(resultComparator);
-
-        for (Searchable item : items) {
-            if (item == null) {
-                continue;
-            }
-            String term = item.getSearchTerm();
-            if (term != null && term.contains(query)) {
-                results.add(item);
-            }
-        }
-        return results;
+        return items.stream()
+                .filter(item -> item != null)
+                .filter(item -> {
+                    String term = item.getSearchTerm();
+                    return term != null && term.contains(query);
+                })
+                .collect(Collectors.toCollection(() -> new TreeSet<>(resultComparator)));
     }
+
 
     public Searchable searchBest(String search) throws BestResultNotFound {
         Searchable best = null;
